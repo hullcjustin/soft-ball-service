@@ -27,14 +27,14 @@ public class StatsController {
         return player;
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = "http://167.99.103.86:8080")
     @RequestMapping(value = "/get-all-players-and-stats", method = RequestMethod.GET)
     public List<PlayersDTO> getAllPlayersAndStats(){
         List<PlayersDTO> playersDTOS = statsService.getAllPlayersAndStats();
         return playersDTOS;
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = "http://167.99.103.86:8080")
     @RequestMapping(value = "/insert-uploaded-stats", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public void insertUploadedStats(@RequestBody List<PlayersDTO> playersDTO ){
         statsService.uploadStats(playersDTO);
