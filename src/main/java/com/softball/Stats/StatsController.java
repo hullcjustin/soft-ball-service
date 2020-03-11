@@ -1,11 +1,9 @@
 package com.softball.Stats;
 
-import org.bson.types.ObjectId;
+import com.softball.Players.Player;
+import com.softball.Players.PlayerDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,16 +25,24 @@ public class StatsController {
         return player;
     }
 
+
     @CrossOrigin(origins = "http://localhost:3000")
     @RequestMapping(value = "/get-all-players-and-stats", method = RequestMethod.GET)
-    public List<PlayersDTO> getAllPlayersAndStats(){
-        List<PlayersDTO> playersDTOS = statsService.getAllPlayersAndStats();
-        return playersDTOS;
+    public List<PlayerDTO> getAllPlayersAndStats(){
+        List<PlayerDTO> playerDTOS = statsService.getAllPlayersAndStats();
+        return playerDTOS;
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
     @RequestMapping(value = "/insert-uploaded-stats", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void insertUploadedStats(@RequestBody List<PlayersDTO> playersDTO ){
-        statsService.uploadStats(playersDTO);
+    public void insertUploadedStats(@RequestBody List<PlayerDTO> playerDTO){
+
+        statsService.uploadStats(playerDTO);
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @RequestMapping(value = "get-undrafted-players", method= RequestMethod.GET)
+    public List<PlayerDTO> createPick(@RequestParam String draftId){
+       return statsService.getUndraftedPlayers(draftId);
     }
 }

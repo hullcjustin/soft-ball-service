@@ -10,22 +10,22 @@ import org.bson.types.ObjectId;
 @Builder
 public class StatsDTO {
 
-    private final String playerId;
-    private final Integer year;
-    private final Integer plateAppearances;
-    private final Integer atBats;
-    private final Integer runs;
-    private final Integer hits;
-    private final Integer firstBase;
-    private final Integer secondBase;
-    private final Integer thirdBase;
-    private final Integer homeRuns;
-    private final Integer rbis;
-    private final Integer walks;
-    private final double battingPercentage;
-    private final double average;
-    private final double slugingPercentage;
-    private final double playersInScoringPosition;
-    private final String captain;
-    private final String defensivePosition;
+    private String playerId;
+    private Integer year;
+    private Integer plateAppearances;
+    private Integer atBats;
+    private Integer runs;
+    private Integer hits;
+    private Integer firstBase;
+    private Integer secondBase;
+    private Integer thirdBase;
+    private Integer homeRuns;
+    private Integer rbis;
+    private Integer walks;
+    private double battingPercentage;
+    private double average;
+    private double slugingPercentage;
+    private double playersInScoringPosition;
+    private String captain;
+    private String defensivePosition;
 }

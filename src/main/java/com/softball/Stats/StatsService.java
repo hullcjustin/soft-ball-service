@@ -1,36 +1,59 @@
 package com.softball.Stats;
 
-import org.bson.types.ObjectId;
-import org.springframework.beans.InvalidPropertyException;
+import com.softball.Draft.DraftDTO;
+import com.softball.Draft.DraftPicks.PicksDTO;
+import com.softball.Draft.IDraftService;
+import com.softball.Players.Player;
+import com.softball.Players.PlayerRepository;
+import com.softball.Players.PlayerDTO;
+import com.softball.Players.PlayerDTOFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class StatsService implements IStatsService{
 
     private PlayerRepository playerRepository;
     private StatsRepository statsRepository;
-    private PlayersDTOFactory playersDTOFactory;
+    private PlayerDTOFactory playerDTOFactory;
+    private IDraftService draftService;
 
     @Autowired
     public StatsService(StatsRepository statsRepository,
                         PlayerRepository playerRepository,
-                        PlayersDTOFactory playersDTOFactory){
+                        PlayerDTOFactory playerDTOFactory,
+                        IDraftService draftService){
         this.statsRepository = statsRepository;
         this.playerRepository = playerRepository;
-        this.playersDTOFactory = playersDTOFactory;
+        this.playerDTOFactory = playerDTOFactory;
+        this.draftService = draftService;
 
     }
 
     @Override
-    public List<PlayersDTO> getAllPlayersAndStats() {
-        List<PlayersDTO> playersDTOS = playersDTOFactory.create(playerRepository.findAll());
-        return playersDTOS;
+    public List<PlayerDTO> getAllPlayersAndStats() {
+        List<PlayerDTO> playerDTOS = playerDTOFactory.createListOfPlayerDTOs(playerRepository.findAll());
+        return playerDTOS;
+    }
+
+    @Override
+    public List<PlayerDTO> getUndraftedPlayers(String draftId) {
+        List<PlayerDTO> playerDTOS = playerDTOFactory.createListOfPlayerDTOs(playerRepository.findAll());
+        DraftDTO draftDTO = draftService.getDraft(draftId);
+        List<PlayerDTO> UndraftedList = playerDTOS.stream().filter(playerDTO -> {
+            for(PicksDTO pick: draftDTO.getPicks()){
+                if(playerDTO.getId().equals(pick.getPlayerId())){
+                    return false;
+                }
+            }
+            return true;
+        }).collect(Collectors.toList());
+
+        return UndraftedList;
     }
 
     public Player getAPlayer(String firstName){
@@ -42,15 +65,15 @@ public class StatsService implements IStatsService{
         return playerRepository.findByName(name);
     }
 
-    public void uploadStats(List<PlayersDTO> playersDTOS){
-        playersDTOS.stream()
-                .forEach(playersDTO -> {
+    public void uploadStats(List<PlayerDTO> playerDTOS){
+        playerDTOS.stream()
+                .forEach(playerDTO -> {
                     UUID uuid = UUID.randomUUID();
                     String randomUUIDString = uuid.toString();
 
-                    Player player = getPlayerByName(playersDTO.getName());
+                    Player player = getPlayerByName(playerDTO.getName());
                     if(player == null){
-                        String[] nameArray =playersDTO.getName().split(" ");
+                        String[] nameArray = playerDTO.getName().split(" ");
                         String firstName = "";
                         String lastName = "";
                         if(nameArray.length == 2){
@@ -67,12 +90,12 @@ public class StatsService implements IStatsService{
                                 ._id(randomUUIDString)
                                 .firstName(firstName)
                                 .lastName(lastName)
-                                .name(playersDTO.getName())
+                                .name(playerDTO.getName())
                                 .build();
                         playerRepository.insert(player);
                     }
 
-                    StatsDTO statsDTO = playersDTO.getStatsDTOS().get(0);
+                    StatsDTO statsDTO = playerDTO.getStatsDTOS().get(0);
 
                     Stats stats = statsRepository.findByPlayerIdAndYear(player._id, statsDTO.getYear());
                     if(stats != null){
