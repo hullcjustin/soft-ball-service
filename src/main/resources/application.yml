@@ -1,5 +1,7 @@
 spring:
   data.mongodb:
-    host: 167.99.103.86
+    host: localhost
     port: 27017
     database: soft_ball
+  main:
+    allow-bean-definition-overriding: true

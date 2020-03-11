@@ -1,0 +1,5 @@
+version: '0.1.0'
+services:
+  cas:
+    image: 167.99.103.86:5000/com.softball/soft-ball-service
+    restart: always

@@ -1,26 +1,41 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+
 buildscript {
     ext{
-        springBootVersion = '2.0.5.RELEASE'
+        springBootVersion = '2.1.7.RELEASE'
+        springCloudVersion = 'Greenwich.RELEASE'
     }
     repositories {
-        mavenCentral()
+        maven {
+            url "http://nexus.adigitalsys.com/repository/maven-public"
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.7'
+        classpath('io.spring.gradle:propdeps-plugin:0.0.10.RELEASE')
+        classpath('com.bmuschko:gradle-docker-plugin:3.0.8')
     }
 }
-
-group 'com.softball'
-version '1.0-SNAPSHOT'
-
-def artifactName="soft-ball"
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'application'
+mainClassName = 'com.softball.SoftBallMain'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'org.asciidoctor.convert'
 
+
+
+group 'com.softball'
+def artifactName="soft-ball"
+version '1.0-SNAPSHOT'
 
 
 sourceCompatibility = 1.8
@@ -28,6 +43,11 @@ targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+jar {
+    baseName = "${artifactName}"
+    version =  '0.3.2'
 }
 
 dependencies {
@@ -38,17 +58,52 @@ dependencies {
     compile('com.univocity:univocity-parsers:2.4.1')
     compile("commons-io:commons-io:2.5")
     compile "com.opencsv:opencsv:4.0"
+    apply plugin: 'com.bmuschko.docker-remote-api'
 
     compileOnly("org.projectlombok:lombok:1.16.18")
+    annotationProcessor  "org.projectlombok:lombok:1.18.8"
     testCompile("junit:junit")
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
-jar {
-    baseName = "${artifactName}"
-    version =  '0.1.0'
+
+
+wrapper {
+    gradleVersion = '5.6.2'
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.1'
+bootJar {
+    launchScript()
 }
+
+ext {
+    springCloudVersion = 'Greenwich.RELEASE'
+    snippetsDir = file('build/generated-snippets')
+}
+
+project.ext {
+    registry = '167.99.103.86:5000'
+}
+
+
+
+bootRun {
+    classpath = sourceSets.main.runtimeClasspath
+    systemProperties = System.properties
+    jvmArgs = ["-client", "-Dsun.net.inetaddr.ttl=60", "-Djava.security.egd=file:/dev/./urandom"]
+}
+
+
+
+
+//task createDockerImage(type: DockerBuildImage) {
+//    inputDir = file('.')
+//    tags = ["${project.registry}/${project.group}/${applicationName}:${version}".toString(), "${project.registry}/${project.group}/${applicationName}:latest".toString()]
+//}
+
+//task pushImageWithVersionTag(type: DockerPushImage) {
+//    imageName = "${project.registry}/${project.group}/${applicationName}:${version}"
+//}
+//task pushImageWithLatestTag(type: DockerPushImage) {
+//    imageName = "${project.registry}/${project.group}/${applicationName}:latest"
+//}

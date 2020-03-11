@@ -1,4 +1,4 @@
-package com.softball.Stats;
+package com.softball.Players;
 
 import lombok.experimental.Tolerate;
 import org.bson.types.ObjectId;
@@ -31,8 +31,6 @@ public class Player {
     @Basic
     @Column(name = "name", nullable = false)
     public String name;
-
-
 
     @Tolerate
     public Player() {
